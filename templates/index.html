@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Airport Investment Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Shared across both themes — only the surfaces and text change below. */
+  :root{
+    --blue:#3b82f6; --blue-hi:#60a5fa; --cyan:#06b6d4;
+    --green:#10b981; --amber:#f59e0b; --purple:#8b5cf6; --red:#f43f5e;
+
+    --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:24px;
+  }
+
+  /* DARK is the default. Both themes are declared as full variable sets rather
+     than one patching the other, so nothing can be half-themed. */
+  :root, :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg-base:     #060d1a;
+    --bg-surface:  #0b1527;
+    --bg-elevated: #101e35;
+    --bg-chip:     rgba(255,255,255,.04);
+    --bg-hover:    rgba(255,255,255,.09);
+    --text-1:#e8f0ff; --text-2:#8fa8cc; --text-3:#4a607e;
+    --border:rgba(59,130,246,.10); --border-hi:rgba(59,130,246,.28);
+    --shadow:0 8px 40px rgba(0,0,0,.45);
+    --glow:0 0 48px rgba(59,130,246,.14);
+    --hero-glow:rgba(59,130,246,.16);
+  }
+
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --bg-base:     #f7f9fc;
+    --bg-surface:  #ffffff;
+    --bg-elevated: #eef3fa;
+    --bg-chip:     rgba(11,21,39,.035);
+    --bg-hover:    rgba(11,21,39,.07);
+    /* Darkened from the dark-mode accents: #60a5fa on white fails contrast. */
+    --blue-hi:#1d4ed8;
+    --text-1:#0b1527; --text-2:#52657d; --text-3:#5f7288;
+    --border:rgba(11,21,39,.10); --border-hi:rgba(29,78,216,.22);
+    --shadow:0 8px 30px rgba(11,21,39,.10);
+    --glow:0 0 44px rgba(59,130,246,.10);
+    --hero-glow:rgba(59,130,246,.13);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg-base);color:var(--text-1);
+       font:400 15px/1.65 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+       -webkit-font-smoothing:antialiased;
+       transition:background .25s,color .25s}
+  .wrap{max-width:960px;margin:0 auto;padding:0 22px}
+  a{color:var(--blue-hi);text-decoration:none}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding:120px 0 78px;overflow:hidden}
+  .hero-bg{position:absolute;inset:-40% 0 auto;height:680px;pointer-events:none;
+    background:radial-gradient(50% 50% at 50% 40%,var(--hero-glow),transparent 70%)}
+  .hero-content{position:relative}
+  .hero-badge{display:inline-flex;align-items:center;gap:9px;background:var(--bg-chip);
+    border:1px solid var(--border-hi);border-radius:999px;padding:8px 17px;
+    font-size:13.5px;color:var(--text-2);letter-spacing:.02em;margin-bottom:28px}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 10px var(--green);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .hero-h1{font-size:clamp(40px,6.6vw,66px);line-height:1.05;font-weight:800;
+    letter-spacing:-.035em;margin:0 0 20px}
+  .hero-h1 em{font-style:normal;
+    background:linear-gradient(100deg,var(--blue-hi),var(--cyan));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero-sub{font-size:19.5px;color:var(--text-2);max-width:660px;margin:0 0 38px}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:56px}
+  .btn{border:0;border-radius:var(--r-md);padding:14px 26px;font:600 15.5px 'Inter',sans-serif;
+    cursor:pointer;transition:.16s}
+  .btn-primary{background:linear-gradient(100deg,var(--blue),#2563eb);color:#fff;
+    box-shadow:0 4px 22px rgba(59,130,246,.32)}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 26px rgba(59,130,246,.45)}
+  .btn-ghost{background:var(--bg-chip);color:var(--text-1);border:1px solid var(--border-hi)}
+  .btn-ghost:hover{background:var(--bg-hover)}
+
+  .hero-stats{display:flex;flex-wrap:wrap;align-items:center;gap:32px}
+  .hero-stat-num{font:700 32px 'Inter';letter-spacing:-.02em;display:block}
+  .hero-stat-label{font-size:12.5px;color:var(--text-3);text-transform:uppercase;
+    letter-spacing:.08em;margin-top:3px}
+  .stat-divider{width:1px;height:42px;background:var(--border-hi)}
+
+  /* ---------- sections ---------- */
+  section{padding:52px 0}
+  .eyebrow{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--blue-hi);margin-bottom:10px}
+  h2{font-size:clamp(23px,3.4vw,31px);font-weight:750;letter-spacing:-.02em;margin:0 0 10px}
+  .lead{color:var(--text-2);max-width:660px;margin:0 0 30px}
+
+  .layers{display:grid;gap:14px}
+  .layer{display:grid;grid-template-columns:44px 1fr;gap:17px;align-items:start;
+    background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--r-lg);
+    padding:19px 21px;transition:.18s}
+  .layer:hover{border-color:var(--border-hi);transform:translateY(-2px);box-shadow:var(--shadow)}
+  .layer-num{width:44px;height:44px;border-radius:var(--r-md);display:grid;place-items:center;
+    font:700 15px 'JetBrains Mono',monospace;background:var(--bg-elevated);
+    border:1px solid var(--border-hi)}
+  .layer:nth-child(1) .layer-num{color:var(--blue-hi)}
+  .layer:nth-child(2) .layer-num{color:var(--green)}
+  .layer:nth-child(3) .layer-num{color:var(--amber)}
+  .layer:nth-child(4) .layer-num{color:var(--purple)}
+  .layer:nth-child(5) .layer-num{color:var(--cyan)}
+  .layer h3{margin:0 0 4px;font-size:16.5px;font-weight:650;
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:9px}
+  .layer h3 span{font:400 11.5px 'JetBrains Mono',monospace;color:var(--text-3);
+    letter-spacing:.02em}
+  .layer p{margin:0;font-size:14.3px;color:var(--text-2)}
+
+  .callouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:14px;margin-top:20px}
+  .callout{background:var(--bg-surface);border:1px solid var(--border);
+    border-left:3px solid var(--blue);border-radius:var(--r-md);padding:16px 18px}
+  .callout.warn{border-left-color:var(--amber)}
+  .callout h4{margin:0 0 5px;font-size:14px;font-weight:650}
+  .callout p{margin:0;font-size:13.6px;color:var(--text-2)}
+
+  /* ---------- chat ---------- */
+  .panel{background:var(--bg-surface);border:1px solid var(--border);
+    border-radius:var(--r-xl);padding:30px;box-shadow:var(--glow)}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:22px}
+  .chip{display:inline-flex;align-items:center;gap:9px;
+    background:var(--bg-chip);border:1px solid var(--border);color:var(--text-2);
+    padding:9px 15px;border-radius:999px;font-size:14px;cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--border-hi);color:var(--text-1);background:var(--bg-hover)}
+  /* the demo step number */
+  .chip b{display:grid;place-items:center;width:19px;height:19px;flex:0 0 19px;
+    border-radius:50%;background:var(--blue);color:#fff;
+    font:600 11.5px 'Inter';line-height:1}
+  .chip code{font:400 12.5px 'JetBrains Mono',monospace;color:var(--amber)}
+  /* Scrolls internally once the conversation grows, so the input stays put
+     instead of being pushed off the bottom of the page. */
+  #log{display:flex;flex-direction:column;gap:15px;margin-bottom:20px;
+    max-height:60vh;overflow-y:auto;scroll-behavior:smooth}
+  #log:empty{display:none}
+  .msg{padding:15px 19px;border-radius:var(--r-lg);max-width:88%;white-space:pre-wrap;
+    word-wrap:break-word;font-size:15.6px;line-height:1.68;animation:rise .22s ease-out}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}}
+  .msg strong{font-weight:680;color:var(--text-1)}
+  .msg ul{margin:9px 0;padding-left:20px}
+  .msg li{margin:5px 0}
+  .msg code{font:400 13.6px 'JetBrains Mono',monospace;background:var(--bg-chip);
+    border:1px solid var(--border);border-radius:5px;padding:1px 6px}
+  .me{align-self:flex-end;background:linear-gradient(100deg,var(--blue),#2563eb);
+    color:#fff;border-bottom-right-radius:5px}
+  .bot{align-self:flex-start;background:var(--bg-elevated);border:1px solid var(--border);
+    border-bottom-left-radius:5px}
+  .err{align-self:flex-start;background:rgba(244,63,94,.10);
+    border:1px solid rgba(244,63,94,.35);color:#ffc9d1}
+  /* ---------- charts ----------
+     Drawn from the tool's returned numbers, never from the model's prose. Plain
+     divs and one inline SVG: no chart library, so nothing external to load. */
+  .chart{align-self:flex-start;max-width:92%;background:var(--bg-elevated);
+    border:1px solid var(--border);border-radius:var(--r-md);padding:15px 17px 13px}
+  .chart-head{font:500 12px 'JetBrains Mono',monospace;color:var(--text-3);
+    text-transform:uppercase;letter-spacing:.07em;margin-bottom:13px}
+  .chart-head span{color:var(--blue-hi)}
+  .chart-note{font-size:12.3px;color:var(--text-3);margin-top:11px;line-height:1.5}
+
+  /* vertical columns — the 6-month congestion window */
+  .cols{display:flex;align-items:flex-end;gap:8px;height:124px}
+  .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;
+    align-items:center;gap:5px;height:100%}
+  .col-bar{width:100%;border-radius:5px 5px 2px 2px;
+    background:linear-gradient(180deg,var(--blue-hi),var(--blue));
+    min-height:3px;transition:height .45s cubic-bezier(.2,.8,.2,1)}
+  .col.peak .col-bar{background:linear-gradient(180deg,var(--amber),#d97706)}
+  .col-val{font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-2)}
+  .col-lab{font:400 10.5px 'JetBrains Mono',monospace;color:var(--text-3)}
+
+  /* horizontal bars — candidate ranking */
+  .bars{display:flex;flex-direction:column;gap:9px}
+  .bar-row{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:11px}
+  .bar-code{font:500 13px 'JetBrains Mono',monospace;color:var(--text-1)}
+  .bar-track{height:22px;background:var(--bg-chip);border-radius:5px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:5px;
+    background:linear-gradient(90deg,var(--blue),var(--cyan));
+    transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .bar-row:first-child .bar-fill{background:linear-gradient(90deg,var(--green),#059669)}
+  .bar-val{font:500 12.5px 'JetBrains Mono',monospace;color:var(--text-2);
+    min-width:74px;text-align:right}
+
+  /* one split bar — domestic vs international */
+  .split{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden}
+  .split div{display:grid;place-items:center;font:500 12px 'JetBrains Mono',monospace;
+    color:#fff;transition:width .5s cubic-bezier(.2,.8,.2,1);min-width:0;
+    white-space:nowrap;overflow:hidden}
+  .split .dom{background:linear-gradient(100deg,var(--blue),#2563eb)}
+  .split .intl{background:linear-gradient(100deg,var(--purple),#7c3aed)}
+  .legend{display:flex;gap:16px;margin-top:11px;font-size:12.3px;color:var(--text-2)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;
+    margin-right:6px;vertical-align:middle}
+
+  /* position on a scale — national rank out of ~1,300 */
+  .scale{position:relative;height:8px;border-radius:4px;margin:26px 0 8px;
+    background:linear-gradient(90deg,var(--green),var(--blue),var(--text-3))}
+  .pin{position:absolute;top:-5px;width:4px;height:18px;border-radius:2px;
+    background:var(--text-1);box-shadow:0 0 0 3px var(--bg-elevated);
+    transform:translateX(-50%)}
+  .pin-lab{position:absolute;top:-27px;transform:translateX(-50%);white-space:nowrap;
+    font:500 11.5px 'JetBrains Mono',monospace;color:var(--text-1)}
+  .pin.past{background:var(--text-3);height:14px;top:-3px}
+  .pin.past .pin-lab{top:auto;bottom:-26px;color:var(--text-3)}
+  .scale-ends{display:flex;justify-content:space-between;
+    font:400 11px 'JetBrains Mono',monospace;color:var(--text-3)}
+
+  /* sparkline — passengers per year */
+  .spark{width:100%;height:104px;display:block;overflow:visible}
+  .spark path.line{fill:none;stroke:var(--blue-hi);stroke-width:2.2;
+    stroke-linejoin:round;stroke-linecap:round}
+  .spark path.fill{fill:var(--blue);opacity:.13;stroke:none}
+  .spark circle{fill:var(--bg-elevated);stroke:var(--blue-hi);stroke-width:2}
+  .spark text{font:400 10.5px 'JetBrains Mono',monospace;fill:var(--text-3)}
+
+  /* debug trace — deliberately plain and monospace, it is a tool not a message */
+  .trace{align-self:stretch;max-width:100%;background:transparent;
+    border:1px dashed var(--border-hi);color:var(--text-2);
+    font:400 13px 'JetBrains Mono',monospace;line-height:1.55}
+  .trace b{color:var(--amber);font-weight:500;text-transform:uppercase;
+    letter-spacing:.08em;font-size:11.5px}
+  .trace details{margin-top:7px}
+  .trace summary{cursor:pointer;color:var(--blue-hi);padding:3px 0}
+  .trace summary:hover{color:var(--text-1)}
+  .trace pre{margin:6px 0 0;padding:11px 13px;background:var(--bg-base);
+    border:1px solid var(--border);border-radius:var(--r-sm);
+    overflow-x:auto;font-size:12.2px;color:var(--text-2);white-space:pre}
+  .row{display:flex;gap:9px}
+  input{flex:1;background:var(--bg-base);border:1px solid var(--border-hi);
+    color:var(--text-1);padding:16px 19px;border-radius:var(--r-md);font:16px 'Inter';
+    transition:.15s}
+  input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.14)}
+  input::placeholder{color:var(--text-3)}
+  #reset{background:transparent;color:var(--text-3);border:1px solid var(--border);
+    padding:16px 18px;font-weight:500}
+  #reset:hover{color:var(--text-1);border-color:var(--border-hi)}
+  .hint{font-size:12.8px;color:var(--text-3);margin:13px 0 0}
+  .dots::after{content:'';animation:d 1.2s steps(4,end) infinite}
+  @keyframes d{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+
+  /* theme toggle */
+  #theme{position:fixed;top:18px;right:18px;z-index:50;width:42px;height:42px;
+    border-radius:50%;display:grid;place-items:center;cursor:pointer;font-size:17px;
+    background:var(--bg-surface);border:1px solid var(--border-hi);color:var(--text-1);
+    box-shadow:var(--shadow);transition:.16s;line-height:1}
+  #theme:hover{background:var(--bg-hover);transform:scale(1.07)}
+
+  footer{border-top:1px solid var(--border);margin-top:44px;padding:26px 0 40px;
+    font-size:13px;color:var(--text-3)}
+  @media(max-width:600px){
+    .msg{max-width:95%}
+    .hero{padding:74px 0 46px}
+    .hero-sub{font-size:17px}
+    .hero-stats{gap:20px}
+    .hero-stat-num{font-size:26px}
+    .stat-divider{display:none}
+    .panel{padding:20px}
+    #theme{top:12px;right:12px;width:38px;height:38px}
+  }
+</style>
+</head>
+<body>
+
+<button id="theme" title="Switch theme" aria-label="Switch between light and dark">◐</button>
+
+<header class="hero">
+  <div class="hero-bg"></div>
+  <div class="wrap hero-content">
+    <div class="hero-badge">
+      <span class="status-dot"></span>
+      Live US Department of Transportation data
+    </div>
+    <h1 class="hero-h1">Find the airports<br>worth <em>rebuilding</em>.</h1>
+    <p class="hero-sub">
+      Ask in plain English. The agent picks the right analysis, queries live
+      federal aviation data, and answers in plain English &mdash; no dashboards,
+      no jargon.
+    </p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="document.getElementById('q').focus()">
+        Ask a question
+      </button>
+      <a class="btn btn-ghost" href="#measure">How it works</a>
+    </div>
+    <div class="hero-stats">
+      <div><span class="hero-stat-num">1,311</span>
+           <span class="hero-stat-label">US airports</span></div>
+      <div class="stat-divider"></div>
+      <div><span class="hero-stat-num">5</span>
+           <span class="hero-stat-label">Signals</span></div>
+      <div class="stat-divider"></div>
+      <div><span class="hero-stat-num">2014&ndash;25</span>
+           <span class="hero-stat-label">Monthly history</span></div>
+      <div class="stat-divider"></div>
+      <div><span class="hero-stat-num">131k</span>
+           <span class="hero-stat-label">Monthly records</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="measure">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>Five signals, five different questions</h2>
+    <p class="lead">
+      Every answer traces back to official federal aviation records &mdash;
+      monthly passenger, seat and departure counts for every US airport since
+      2014. Each signal reads them a different way.
+    </p>
+
+    <div class="layers">
+      <div class="layer">
+        <div class="layer-num">01</div>
+        <div>
+          <h3>Congestion <span>how full is it now?</span></h3>
+          <p>Share of available seats actually sold, averaged over the last six
+             months, plus the peak month.</p>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">02</div>
+        <div>
+          <h3>Growth <span>which direction?</span></h3>
+          <p>Yearly passenger growth, recovery against 2019, whether momentum is
+             speeding up or slowing, and whether airlines are adding seats fast
+             enough to keep pace.</p>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">03</div>
+        <div>
+          <h3>Candidate score <span>which one do we pick?</span></h3>
+          <p>Congestion and growth combined into one ranking, so several airports
+             can be compared side by side.</p>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">04</div>
+        <div>
+          <h3>Traffic mix <span>what should we build?</span></h3>
+          <p>International share and average trip length &mdash; the two things
+             that decide whether you need customs halls and wide-body gates, or
+             domestic gates and faster security.</p>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-num">05</div>
+        <div>
+          <h3>National rank <span>how big, gaining or losing?</span></h3>
+          <p>Position among all 1,311 US airports, and how far it has climbed or
+             fallen in ten years. An airport can grow every year and still lose
+             ground.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callouts">
+      <div class="callout">
+        <h4>Every number, same date</h4>
+        <p>Growth and rank are measured over the same period, so they are directly
+           comparable &mdash; no stale figure quietly sitting beside a fresh one.</p>
+      </div>
+      <div class="callout">
+        <h4>Whether vs what</h4>
+        <p>Four signals count how many passengers. Traffic mix asks who they are
+           &mdash; two airports can look identical yet need completely different
+           buildings.</p>
+      </div>
+      <div class="callout warn">
+        <h4>What it won't answer</h4>
+        <p>No delays, gate counts, fares or route-level detail. That data isn't
+           in this table, and the agent says so rather than guessing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ask">
+  <div class="wrap">
+    <p class="eyebrow">Ask</p>
+    <h2>Tell me what you're looking for</h2>
+    <p class="lead">Follow-ups keep context &mdash; try &ldquo;and Boston?&rdquo;
+       after your first question.</p>
+
+    <div class="panel">
+      <!-- A demo sequence, not a grab-bag: one question per KPI, each drawing a
+           different chart, ending on two that combine tools. The data-q attribute
+           is what gets asked; the visible label says what to expect. -->
+      <div class="chips">
+        <span class="chip" data-q="How congested is SFO?">
+          <b>1</b> How congested is SFO?</span>
+        <span class="chip" data-q="Is LAX growing?">
+          <b>2</b> Is LAX growing?</span>
+        <span class="chip" data-q="Rank BOS, PVD, MHT and BDL as expansion candidates">
+          <b>3</b> Rank BOS, PVD, MHT and BDL</span>
+        <span class="chip" data-q="Is JFK an international airport?">
+          <b>4</b> Is JFK an international airport?</span>
+        <span class="chip" data-q="Is PWM a major airport?">
+          <b>5</b> Is PWM a major airport?</span>
+        <span class="chip" data-q="Should Denver or JFK get an international terminal?">
+          <b>+</b> Denver or JFK for an international terminal?</span>
+        <span class="chip" data-q="Is SFO growing but losing ground to other airports? (debug)">
+          <b>+</b> Is SFO growing but losing ground? <code>(debug)</code></span>
+      </div>
+      <div id="log"></div>
+      <div class="row">
+        <input id="q" placeholder="Ask about any US airport&hellip;" autocomplete="off">
+        <button class="btn btn-primary" id="send">Ask</button>
+        <button class="btn" id="reset" title="Start a new conversation">Reset</button>
+      </div>
+      <p class="hint">The first question takes a few seconds while the data warms
+        up. After that, answers are near-instant.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Built on US Bureau of Transportation Statistics data.
+    For educational purposes &mdash; not investment advice.
+  </div>
+</footer>
+
+<script>
+// ---------- theme ----------
+// Start from what the visitor has chosen before, else follow their OS setting.
+const themeBtn = document.getElementById('theme');
+const saved = localStorage.getItem('theme');
+const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.textContent = t === 'dark' ? '☾' : '☀';
+}
+applyTheme(saved || (prefersLight ? 'light' : 'dark'));
+
+themeBtn.onclick = () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark'
+             ? 'light' : 'dark';
+  applyTheme(next);
+  localStorage.setItem('theme', next);
+};
+
+// ---------- chat ----------
+// The conversation lives HERE, in the browser, and is replayed to the server on
+// every turn. That keeps the server stateless: nothing is shared between
+// visitors, and there is no session store to outgrow.
+let history = [];
+const log  = document.getElementById('log'),
+      q    = document.getElementById('q'),
+      send = document.getElementById('send');
+
+// The model replies in Markdown, so **bold** must become <strong> or the reader
+// just sees asterisks. Everything is escaped FIRST and only these few patterns
+// are then re-introduced as tags — never assign raw model output to innerHTML,
+// which would let a crafted reply inject arbitrary markup.
+function markdown(text){
+  const esc = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return esc
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|\s)\*([^*\n]+)\*(?=\s|[.,;:!?)]|$)/g, '$1<em>$2</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/^\s*[-*]\s+(.*)$/gm, '<li>$1</li>')
+    .replace(/^\s*(\d+)\.\s+(.*)$/gm, '<li>$1. $2</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)(?!\s*<li>)/g, '<ul>$1</ul>');
+}
+
+function add(text, cls){
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  // Only the agent writes Markdown; the user's own text stays literal.
+  if(cls === 'bot') d.innerHTML = markdown(text);
+  else d.textContent = text;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;   // #log scrolls internally, so drive it directly
+  return d;
+}
+
+// ---------- charts ----------
+// One renderer per tool, each reading ONLY that tool's returned JSON. A chart is
+// a second claim about the data, and if it disagreed with the text the reader
+// would believe the chart — so nothing here parses the model's answer.
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+function chart(title, subject, body, note){
+  const d = document.createElement('div');
+  d.className = 'msg chart';
+  d.innerHTML = '<div class="chart-head">' + esc(title) + ' · <span>'
+              + esc(subject) + '</span></div>' + body
+              + (note ? '<div class="chart-note">' + esc(note) + '</div>' : '');
+  log.appendChild(d);
+}
+
+// KPI 1 — six columns. Scaled from 50%, not 0: every airport sits in the 70-90
+// band, and a 0-based axis would flatten all six bars into the same height.
+function chartCongestion(r){
+  const lo = 50, peak = r.peak_month;
+  const cols = r.monthly.map(m => {
+    const h = Math.max(3, (m.load_factor - lo) / (100 - lo) * 100);
+    return '<div class="col' + (m.month === peak ? ' peak' : '') + '">'
+         + '<div class="col-val">' + m.load_factor.toFixed(0) + '</div>'
+         + '<div class="col-bar" style="height:' + h.toFixed(1) + '%"></div>'
+         + '<div class="col-lab">' + esc(m.month.slice(2)) + '</div></div>';
+  }).join('');
+  chart('Load factor by month', r.airport, '<div class="cols">' + cols + '</div>',
+        'Average ' + r.avg_load_factor + '% over ' + r.months
+        + ' months. Amber is the peak (' + esc(peak) + '). Bars start at 50%, '
+        + 'not 0, so the seasonal swing is visible.');
+}
+
+// KPI 2 — the actual passenger curve. The 2020 drop is why rates alone mislead.
+function chartGrowth(r){
+  const pts = r.yearly || [];
+  if(pts.length < 2) return;
+  const W = 600, H = 104, pad = 16;
+  const max = Math.max(...pts.map(p => p.passengers)) * 1.08;
+  const x = i => pad + i * (W - pad * 2) / (pts.length - 1);
+  const y = v => H - 20 - (v / max) * (H - 34);
+  const line = pts.map((p, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' '
+                                     + y(p.passengers).toFixed(1)).join(' ');
+  const area = line + ' L' + x(pts.length - 1).toFixed(1) + ' ' + (H - 20)
+             + ' L' + pad + ' ' + (H - 20) + ' Z';
+  // Label only first / last / lowest: 12 years of labels would collide.
+  const dip = pts.indexOf(pts.reduce((a, b) => a.passengers < b.passengers ? a : b));
+  const keep = new Set([0, pts.length - 1, dip]);
+  const marks = pts.map((p, i) => keep.has(i)
+    ? '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(p.passengers).toFixed(1)
+      + '" r="3.5"/><text x="' + x(i).toFixed(1) + '" y="' + (H - 6)
+      + '" text-anchor="middle">' + p.year + '</text>'
+      + '<text x="' + x(i).toFixed(1) + '" y="' + (y(p.passengers) - 9).toFixed(1)
+      + '" text-anchor="middle">' + (p.passengers / 1e6).toFixed(1) + 'M</text>'
+    : '').join('');
+  chart('Passengers per year', r.airport,
+        '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" '
+        + 'preserveAspectRatio="none"><path class="fill" d="' + area
+        + '"/><path class="line" d="' + line + '"/>' + marks + '</svg>',
+        pts[0].year + '–' + pts[pts.length - 1].year
+        + ', complete years only. ' + r.passengers_latest_year + ' in '
+        + r.through_year + '.');
+}
+
+// KPI 3 — the ranking, sorted. Scaled from the lowest score so the gaps between
+// candidates are readable; the scores themselves sit in a narrow band.
+function chartCandidate(r){
+  const rk = r.ranked || [];
+  if(!rk.length) return;
+  const vals = rk.map(a => a.score),
+        top = Math.max(...vals), lo = Math.min(...vals) - (top - Math.min(...vals) || 1) * .6;
+  const rows = rk.map(a =>
+    '<div class="bar-row"><div class="bar-code">' + esc(a.airport) + '</div>'
+    + '<div class="bar-track"><div class="bar-fill" style="width:'
+    + Math.max(4, (a.score - lo) / (top - lo) * 100).toFixed(1) + '%"></div></div>'
+    + '<div class="bar-val">' + a.score + ' · ' + esc(a.verdict)
+    + '</div></div>').join('');
+  chart('Expansion candidates, ranked', rk.length + ' airports',
+        '<div class="bars">' + rows + '</div>',
+        'Score combines how full flights are now with how fast demand is growing. '
+        + 'Green is the leader. Bars are scaled to the spread, not to zero.'
+        + (r.not_found ? ' No data for: ' + r.not_found.join(', ') + '.' : ''));
+}
+
+// KPI 4 — one split bar. The whole point is a single proportion.
+function chartMix(r){
+  const intl = r.international_share_pct, dom = 100 - intl;
+  // A 0%-wide cell is skipped entirely: an empty div still shows a hairline of
+  // colour at some zoom levels, which reads as "a little international traffic".
+  const cell = (c, v) => v <= 0 ? ''
+             : '<div class="' + c + '" style="width:' + v.toFixed(1)
+             + '%">' + (v >= 12 ? v.toFixed(0) + '%' : '') + '</div>';
+  chart('Domestic vs international', r.airport,
+        '<div class="split">' + cell('dom', dom) + cell('intl', intl) + '</div>'
+        + '<div class="legend"><span><i style="background:var(--blue)"></i>'
+        + 'Domestic ' + dom.toFixed(1) + '%</span>'
+        + '<span><i style="background:var(--purple)"></i>International '
+        + intl.toFixed(1) + '%</span></div>',
+        esc(r.airport_type) + '. Average trip ' + r.avg_trip_miles
+        + ' miles (' + esc(r.trip_length) + ').');
+}
+
+// KPI 5 — a position, so a position is what gets drawn. Log scale: rank 10 and
+// rank 95 are both near the left edge linearly, yet they are different worlds.
+function chartRank(r){
+  const total = r.of_airports, past = r.rank_10y_ago;
+  const at = n => Math.min(100, Math.log(n) / Math.log(total) * 100);
+  const pin = (n, cls, lab) =>
+    '<div class="pin ' + cls + '" style="left:' + at(n).toFixed(2) + '%">'
+    + '<div class="pin-lab">' + esc(lab) + '</div></div>';
+  // The 10-years-ago pin is drawn only when it would land somewhere ELSE. ATL was
+  // rank 1 then and now, and two pins at 0% overlap into an unreadable smudge.
+  const moved = past && Math.abs(at(past) - at(r.rank)) > 1.2;
+  chart('National position', r.airport,
+        '<div class="scale">'
+        + (moved ? pin(past, 'past', (r.year - 10) + ': #' + past) : '')
+        + pin(r.rank, '', 'now: #' + r.rank) + '</div>'
+        + '<div class="scale-ends"><span>#1 busiest</span><span>#'
+        + total.toLocaleString() + '</span></div>',
+        'Rank ' + r.rank + ' of ' + total.toLocaleString() + ' US airports ('
+        + r.year + ') — ' + esc(r.tier) + '. '
+        + (moved ? 'Grey marks ' + (r.year - 10) + '. '
+                 : past ? 'Essentially unchanged since ' + (r.year - 10)
+                          + ' (#' + past + '). ' : '')
+        + 'Log scale, so the crowded top of the list stays readable.');
+}
+
+const CHARTS = {
+  get_congestion:   r => r.monthly && chartCongestion(r),
+  get_growth:       r => r.yearly  && chartGrowth(r),
+  get_candidate:    chartCandidate,
+  get_traffic_mix:  r => r.international_share_pct != null && chartMix(r),
+  get_national_rank:r => r.rank    && chartRank(r),
+};
+
+// Draw a chart per successful tool call, in the order they ran.
+function addCharts(trace){
+  (trace || []).forEach(t => {
+    const draw = CHARTS[t.tool], r = t.result;
+    if(!draw || !r || typeof r !== 'object' || r.found === false) return;
+    try{ draw(r); }catch(e){ /* never let a chart break the answer */ }
+  });
+  log.scrollTop = log.scrollHeight;
+}
+
+// Which tools actually ran, straight from the server's record of the turn.
+function addTrace(trace){
+  const d = document.createElement('div');
+  d.className = 'msg trace';
+  if(!trace.length){
+    d.innerHTML = '<b>debug</b> — no tool was called; the answer came from the '
+                + 'model itself.';
+  }else{
+    d.innerHTML = '<b>debug</b> — ' + trace.length
+      + (trace.length === 1 ? ' tool call' : ' tool calls')
+      + trace.map(t => {
+          const args  = (t.arguments || '').replace(/[{}"]/g,'');
+          const found = t.found === false ? ' · not found' : '';
+          return '<details><summary>' + t.tool + '(' + args + ')' + found
+               + '</summary><pre>'
+               + JSON.stringify(t.result, null, 1)
+                   .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+               + '</pre></details>';
+        }).join('');
+  }
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function ask(){
+  const question = q.value.trim();
+  if(!question) return;
+  q.value = '';
+  send.disabled = true;
+  add(question, 'me');
+  const wait = add('thinking', 'bot');
+  wait.classList.add('dots');
+  try{
+    const r = await fetch('/api/ask', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({question, history})
+    });
+    const data = await r.json();
+    wait.remove();
+    if(data.error){
+      add(data.error, 'err');
+    }else{
+      add(data.answer, 'bot');
+      addCharts(data.trace);                    // always — charts are the point
+      if(data.debug) addTrace(data.trace);      // raw JSON only when asked
+      history = data.history;      // adopt the server's version for next turn
+    }
+  }catch(e){
+    wait.remove();
+    add('Could not reach the server. Is it still running?', 'err');
+  }
+  send.disabled = false;
+  q.focus();
+}
+
+send.onclick = ask;
+q.onkeydown = e => { if(e.key === 'Enter') ask(); };
+// data-q is the question; the chip's visible text also carries a number and the
+// chart it draws, which must not be sent to the model.
+document.querySelectorAll('.chip').forEach(c => c.onclick = () => {
+  q.value = c.dataset.q || c.textContent.trim();
+  ask();
+  document.getElementById('ask').scrollIntoView({behavior:'smooth', block:'start'});
+});
+document.getElementById('reset').onclick = () => {
+  history = [];                    // no server call — memory is local
+  log.innerHTML = '';
+  q.focus();
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Render deployment. Commit this, point Render at the repo, and it reads this file.
+#
+# WHY NOT VERCEL: Vercel is serverless — every request may hit a cold process, so
+# bts.py's in-memory cache would never warm up and the first BTS fetch (~16s for a
+# six-airport ranking) would be paid over and over. Render runs one long-lived
+# process, so that cost is paid once at boot.
+#
+# WHY NOT GUNICORN: its forked workers segfault on macOS once the OpenAI client is
+# loaded, and multiple workers would each hold a separate cache anyway. Flask's
+# threaded server is the right size for a demo.
+services:
+  - type: web
+    name: airport-investment-agent
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 web.py
+    healthCheckPath: /health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false          # set this in the Render dashboard, never in git
+      - key: PYTHON_VERSION
+        value: "3.13.3"      # match the local .venv so behaviour is identical
