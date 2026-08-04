@@ -128,8 +128,19 @@ def get_candidate(airports):
     found = [b for b in results if b]
     missing = [code for code, b in zip(airports, results) if not b]
     ranked = sorted(found, key=score, reverse=True)
+    # The four signals BEHIND the score, so the model can explain a ranking instead of
+    # reciting it. Without these it only ever sees "score 85.3, weak" and cannot say
+    # why one airport beats another. Already computed by blocks() — no extra work.
     result = {"ranked": [{"airport": b["airport"], "score": rnd(score(b)),
-                          "verdict": verdict(b)} for b in ranked]}
+                          "verdict": verdict(b),
+                          "load_factor": rnd(b["lf"]),
+                          "growth_per_year_pct": rnd(b["cagr"]),
+                          # A SENTENCE, not a number: the model read the bare gap as a
+                          # capacity level and reported "demand is below seated
+                          # capacity (-0.8%)", inverting the meaning. It is a rate
+                          # comparison, so it has to arrive already interpreted.
+                          "demand_vs_seats": airline_response_phrase(b["gap"]),
+                          "vs_2019_pct": rnd(b["vs19"])} for b in ranked]}
     if missing:
         result["not_found"] = missing
         result["note"] = ("No BTS data for these codes — they are excluded from the "
