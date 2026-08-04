@@ -279,7 +279,7 @@
     <h1 class="hero-h1">Find the airports<br>worth <em>rebuilding</em>.</h1>
     <p class="hero-sub">
       Ask in plain English. The agent picks the right analysis, queries live
-      federal aviation data, and answers in plain English &mdash; no dashboards,
+      federal aviation data, and answers in plain English - no dashboards,
       no jargon.
     </p>
     <div class="hero-actions">
@@ -295,7 +295,7 @@
       <div><span class="hero-stat-num">5</span>
            <span class="hero-stat-label">Signals</span></div>
       <div class="stat-divider"></div>
-      <div><span class="hero-stat-num">2014&ndash;25</span>
+      <div><span class="hero-stat-num">2014-25</span>
            <span class="hero-stat-label">Monthly history</span></div>
       <div class="stat-divider"></div>
       <div><span class="hero-stat-num">131k</span>
@@ -309,7 +309,7 @@
     <p class="eyebrow">How it works</p>
     <h2>Five signals, five different questions</h2>
     <p class="lead">
-      Every answer traces back to official federal aviation records &mdash;
+      Every answer traces back to official federal aviation records -
       monthly passenger, seat and departure counts for every US airport since
       2014. Each signal reads them a different way.
     </p>
@@ -344,7 +344,7 @@
         <div class="layer-num">04</div>
         <div>
           <h3>Traffic mix <span>what should we build?</span></h3>
-          <p>International share and average trip length &mdash; the two things
+          <p>International share and average trip length - the two things
              that decide whether you need customs halls and wide-body gates, or
              domestic gates and faster security.</p>
         </div>
@@ -364,12 +364,12 @@
       <div class="callout">
         <h4>Every number, same date</h4>
         <p>Growth and rank are measured over the same period, so they are directly
-           comparable &mdash; no stale figure quietly sitting beside a fresh one.</p>
+           comparable - no stale figure quietly sitting beside a fresh one.</p>
       </div>
       <div class="callout">
         <h4>Whether vs what</h4>
         <p>Four signals count how many passengers. Traffic mix asks who they are
-           &mdash; two airports can look identical yet need completely different
+           - two airports can look identical yet need completely different
            buildings.</p>
       </div>
       <div class="callout warn">
@@ -385,11 +385,11 @@
   <div class="wrap">
     <p class="eyebrow">Ask</p>
     <h2>Tell me what you're looking for</h2>
-    <p class="lead">Follow-ups keep context &mdash; try &ldquo;and Boston?&rdquo;
+    <p class="lead">Follow-ups keep context - try &ldquo;and Boston?&rdquo;
        after your first question.</p>
 
     <div class="panel">
-      <!-- A demo sequence, not a grab-bag: one question per KPI, each drawing a
+      <!-- A demo sequence, not a grab-bag: one question per signal, each drawing a
            different chart, ending on two that combine tools. The data-q attribute
            is what gets asked; the visible label says what to expect. -->
       <div class="chips">
@@ -423,7 +423,7 @@
 <footer>
   <div class="wrap">
     Built on US Bureau of Transportation Statistics data.
-    For educational purposes &mdash; not investment advice.
+    For educational purposes - not investment advice.
   </div>
 </footer>
 
@@ -497,7 +497,7 @@ function chart(title, subject, body, note){
   log.appendChild(d);
 }
 
-// KPI 1 — six columns. Scaled from 50%, not 0: every airport sits in the 70-90
+// Signal 1 — six columns. Scaled from 50%, not 0: every airport sits in the 70-90
 // band, and a 0-based axis would flatten all six bars into the same height.
 function chartCongestion(r){
   const lo = 50, peak = r.peak_month;
@@ -514,7 +514,7 @@ function chartCongestion(r){
         + 'not 0, so the seasonal swing is visible.');
 }
 
-// KPI 2 — the actual passenger curve. The 2020 drop is why rates alone mislead.
+// Signal 2 — the actual passenger curve. The 2020 drop is why rates alone mislead.
 function chartGrowth(r){
   const pts = r.yearly || [];
   if(pts.length < 2) return;
@@ -540,12 +540,12 @@ function chartGrowth(r){
         '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" '
         + 'preserveAspectRatio="none"><path class="fill" d="' + area
         + '"/><path class="line" d="' + line + '"/>' + marks + '</svg>',
-        pts[0].year + '–' + pts[pts.length - 1].year
+        pts[0].year + '-' + pts[pts.length - 1].year
         + ', complete years only. ' + r.passengers_latest_year + ' in '
         + r.through_year + '.');
 }
 
-// KPI 3 — the ranking, sorted. Scaled from the lowest score so the gaps between
+// Signal 3 — the ranking, sorted. Scaled from the lowest score so the gaps between
 // candidates are readable; the scores themselves sit in a narrow band.
 function chartCandidate(r){
   const rk = r.ranked || [];
@@ -565,7 +565,7 @@ function chartCandidate(r){
         + (r.not_found ? ' No data for: ' + r.not_found.join(', ') + '.' : ''));
 }
 
-// KPI 4 — one split bar. The whole point is a single proportion.
+// Signal 4 — one split bar. The whole point is a single proportion.
 function chartMix(r){
   const intl = r.international_share_pct, dom = 100 - intl;
   // A 0%-wide cell is skipped entirely: an empty div still shows a hairline of
@@ -583,7 +583,7 @@ function chartMix(r){
         + ' miles (' + esc(r.trip_length) + ').');
 }
 
-// KPI 5 — a position, so a position is what gets drawn. Log scale: rank 10 and
+// Signal 5 — a position, so a position is what gets drawn. Log scale: rank 10 and
 // rank 95 are both near the left edge linearly, yet they are different worlds.
 function chartRank(r){
   const total = r.of_airports, past = r.rank_10y_ago;
@@ -601,7 +601,7 @@ function chartRank(r){
         + '<div class="scale-ends"><span>#1 busiest</span><span>#'
         + total.toLocaleString() + '</span></div>',
         'Rank ' + r.rank + ' of ' + total.toLocaleString() + ' US airports ('
-        + r.year + ') — ' + esc(r.tier) + '. '
+        + r.year + ') - ' + esc(r.tier) + '. '
         + (moved ? 'Grey marks ' + (r.year - 10) + '. '
                  : past ? 'Essentially unchanged since ' + (r.year - 10)
                           + ' (#' + past + '). ' : '')
@@ -631,10 +631,10 @@ function addTrace(trace){
   const d = document.createElement('div');
   d.className = 'msg trace';
   if(!trace.length){
-    d.innerHTML = '<b>debug</b> — no tool was called; the answer came from the '
+    d.innerHTML = '<b>debug</b> - no tool was called; the answer came from the '
                 + 'model itself.';
   }else{
-    d.innerHTML = '<b>debug</b> — ' + trace.length
+    d.innerHTML = '<b>debug</b> - ' + trace.length
       + (trace.length === 1 ? ' tool call' : ' tool calls')
       + trace.map(t => {
           const args  = (t.arguments || '').replace(/[{}"]/g,'');
