@@ -27,10 +27,10 @@ Everything comes from **one** BTS table - `r495-tyji`, "T-100 Segment Summary By
 Origin Airport": one row per airport per month, 2014 to present, live JSON API.
 
 That table holds only four raw facts - **passengers, seats, departures, load
-factor** (plus a domestic split and average trip distance). Each KPI is a
+factor** (plus a domestic split and average trip distance). Each signal is a
 different question asked of those same numbers:
 
-| KPI | Question | Compared against |
+| Signal | Question | Compared against |
 |---|---|---|
 | **1 Congestion** | How full is it *now*? | fixed thresholds |
 | **2 Growth** | Which *direction*? | its own past |
@@ -38,7 +38,7 @@ different question asked of those same numbers:
 | **4 Traffic mix** | *What* should we build? | size / trip-length bands |
 | **5 National rank** | How *big*, gaining or losing? | all ~1,300 US airports |
 
-**KPIs 1/2/3/5 answer *whether* to build; KPI 4 answers *what*.** JFK is 53%
+**Signals 1/2/3/5 answer *whether* to build; Signal 4 answers *what*.** JFK is 53%
 international on 2,653-mile average trips; DEN is 6% on 1,039. Identical load
 factor and growth still mean customs halls at one and domestic gates at the other.
 
@@ -67,7 +67,7 @@ growth gap contributes under 2%, and `score()` and `verdict()` can disagree (PVD
 valuation: the ordering is defensible, the number has no unit, small gaps are noise.
 Normalising each term with explicit weights is the fix, and is not done yet.
 
-The other four KPIs have no scoring - they report a measurement against fixed bands.
+The other four signals have no scoring - they report a measurement against fixed bands.
 
 ---
 
@@ -115,14 +115,14 @@ data_extractor_by_kpi/
   agent.py       the conversation loop + memory
   prompts.py     the system prompt - how the agent BEHAVES (routing lives here)
   tools.py       the five tools + their schemas - what the agent can DO
-  kpis.py        all five KPI calculations, as pure functions
+  kpis.py        all five signal calculations, as pure functions
   bts.py         shared query layer: api(), fetch_*, by_year(), num()
   selftest.py    54 invariant checks against live BTS (no API key needed)
   TESTS.md       debugging map: question -> expected tool
 ```
 
-The five KPIs live in **one** file because they are five questions asked of one
-table, not five independent analyses - KPI 3 is literally KPI 1 + KPI 2 added
+The five signals live in **one** file because they are five questions asked of one
+table, not five independent analyses - Signal 3 is literally Signal 1 + Signal 2 added
 together. Everything in `kpis.py` is pure (rows in, dict out, no I/O), which is
 what makes `selftest.py` possible.
 
