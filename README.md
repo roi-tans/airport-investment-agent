@@ -44,6 +44,33 @@ factor and growth still mean customs halls at one and domestic gates at the othe
 
 ---
 
+## Scoring methodology
+
+The score and the ranking are **deterministic Python** (`kpis.py`):
+
+```python
+score = load_factor + 3yr_passenger_growth + max(demand_vs_seats_gap, 0)
+```
+
+*Full now* is the base; *growing* and *unmet demand* add on top. A separate
+`verdict()` applies thresholds: STRONG needs load factor >=82 **and** positive
+growth **and** a positive gap; "(still recovering)" appends when below 2019.
+
+The LLM never computes or re-orders a score. Its judgement is in **which tool to
+call, which airport codes to use** ("New England" -> BOS, BDL, PVD, MHT), and **how
+to explain** the result.
+
+**Known limitation: load factor is 88-97% of the score**, measured across 8
+airports. The three terms are different units - a level, a rate, points/yr - so the
+growth gap contributes under 2%, and `score()` and `verdict()` can disagree (PVD
+85.3 "weak" outranks BDL 84.8 "moderate"). Treat it as a ranking heuristic, not a
+valuation: the ordering is defensible, the number has no unit, small gaps are noise.
+Normalising each term with explicit weights is the fix, and is not done yet.
+
+The other four KPIs have no scoring - they report a measurement against fixed bands.
+
+---
+
 ## How the agent picks a tool
 
 **Nothing in the Python decides.** The model receives all five tool schemas, reads
