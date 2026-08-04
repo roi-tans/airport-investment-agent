@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-tools.py — the KPI tools the model can activate, and their OpenAI schemas.
+tools.py — the five tools the model can activate, and their OpenAI schemas.
 
-Each tool is a thin wrapper that turns a KPI module into STRUCTURED data
+Each tool is a thin wrapper that turns a signal module into STRUCTURED data
 (a dict), never printed text: the model reads these results, so they must be
 small, self-describing, and honest about failure.
 
@@ -10,7 +10,7 @@ TWO EXPORTS the agent needs:
   TOOLS         name -> function, for dispatching what the model asked for
   TOOL_SCHEMAS  the routing menu sent to the model on every call
 
-Add a KPI by writing one wrapper + one schema() entry — nothing else changes.
+Add a signal by writing one wrapper + one schema() entry — nothing else changes.
 """
 from bts import by_year, fetch_all_months, fetch_recent_months, full_year, parallel
 from kpis import (blocks, congestion, growth, haul, mix, national_rank, profile,
@@ -55,8 +55,8 @@ def recovery_phrase(vs19):
     if vs19 is None:
         return "No 2019 baseline in the data, so recovery is unknown."
     if vs19 >= 0:
-        return f"Busier than before the pandemic — {vs19:.1f}% ABOVE its 2019 level."
-    return (f"Still {abs(vs19):.1f}% BELOW its 2019 level — it has not fully "
+        return f"Busier than before the pandemic - {vs19:.1f}% ABOVE its 2019 level."
+    return (f"Still {abs(vs19):.1f}% BELOW its 2019 level - it has not fully "
             "recovered yet.")
 
 def momentum_phrase(trajectory):
@@ -77,11 +77,11 @@ def airline_response_phrase(gap):
         return "Not enough years to compare passenger growth against seat growth."
     if gap > 0.5:
         return (f"Passengers are growing FASTER than airlines add seats "
-                f"({gap:+.1f} points/year) — flights keep getting fuller, a sign "
+                f"({gap:+.1f} points/year) - flights keep getting fuller, a sign "
                 "of demand the airport cannot absorb.")
     if gap < -0.5:
         return (f"Airlines are adding seats FASTER than passengers grow "
-                f"({gap:+.1f} points/year) — the crowding is easing on its own.")
+                f"({gap:+.1f} points/year) - the crowding is easing on its own.")
     return (f"Passenger growth and added seats are roughly in step "
             f"({gap:+.1f} points/year).")
 
@@ -143,14 +143,14 @@ def get_candidate(airports):
                           "vs_2019_pct": rnd(b["vs19"])} for b in ranked]}
     if missing:
         result["not_found"] = missing
-        result["note"] = ("No BTS data for these codes — they are excluded from the "
+        result["note"] = ("No BTS data for these codes - they are excluded from the "
                           "ranking, NOT ranked low. Verify them and retry.")
     return result
 
 def get_national_rank(airport):
-    """KPI 5: where this airport sits among ALL US airports, and which way it moved.
+    """Signal 5: where this airport sits among ALL US airports, and which way it moved.
 
-    Ranked live from the same table as KPI 1-3, so every airport gets a real
+    Ranked live from the same table as Signal 1-3, so every airport gets a real
     rank out of ~1,300 — small airports included — as of the same year.
     """
     r = national_rank(airport)
@@ -163,11 +163,11 @@ def get_national_rank(airport):
                     "gaining or losing ground nationally.")
     elif direction == "climbing":
         movement = (f"It has CLIMBED {moved} places in 10 years (was rank "
-                    f"{r['rank_10y_ago']}) — it is winning passengers faster than "
+                    f"{r['rank_10y_ago']}) - it is winning passengers faster than "
                     "other US airports.")
     elif direction == "falling":
         movement = (f"It has FALLEN {abs(moved)} places in 10 years (was rank "
-                    f"{r['rank_10y_ago']}) — other airports grew faster, so it is "
+                    f"{r['rank_10y_ago']}) - other airports grew faster, so it is "
                     "losing ground nationally even if its own traffic rose.")
     else:
         movement = (f"Its national position is unchanged in 10 years (rank "
@@ -175,11 +175,11 @@ def get_national_rank(airport):
 
     return {**r,
             "size": f"Rank {r['rank']} of {r['of_airports']} US airports by "
-                    f"passengers in {r['year']} — a {r['tier']}.",
+                    f"passengers in {r['year']} - a {r['tier']}.",
             "movement": movement}
 
 def get_traffic_mix(airport):
-    """KPI 4: what KIND of passenger, which decides what kind of terminal."""
+    """Signal 4: what KIND of passenger, which decides what kind of terminal."""
     rows = fetch_recent_months(airport)
     if not rows:
         return not_found(airport)
@@ -210,33 +210,33 @@ def schema(fn, description, properties):
 
 TOOL_SCHEMAS = [
     schema(get_congestion,
-           "KPI 1. How full an airport's flights are (load factor) over recent months. "
+           "Signal 1. How full an airport's flights are (load factor) over recent months. "
            "Use for congestion / how busy / how full.",
            ONE_AIRPORT),
     schema(get_growth,
-           "KPI 2. Whether an airport is growing: average yearly passenger growth, "
+           "Signal 2. Whether an airport is growing: average yearly passenger growth, "
            "whether it has recovered past 2019, whether growth is speeding up or "
            "slowing, and whether airlines are adding seats fast enough to keep up. "
-           "Returns plain-English sentences — quote them rather than the raw numbers.",
+           "Returns plain-English sentences - quote them rather than the raw numbers.",
            ONE_AIRPORT),
     schema(get_candidate,
-           "KPI 3. Score/rank one or more airports as terminal-expansion candidates "
+           "Signal 3. Score/rank one or more airports as terminal-expansion candidates "
            "(full now + growing + demand outrunning capacity). Pass several codes to "
            "compare a region.",
            MANY_AIRPORTS),
     schema(get_traffic_mix,
-           "KPI 4. What KIND of traffic an airport has: international vs domestic "
+           "Signal 4. What KIND of traffic an airport has: international vs domestic "
            "share and average trip length, and what that implies for the terminal "
            "(customs halls, wide-body gates, dwell time). Use for 'international', "
            "'domestic', 'long-haul', 'what kind of airport', or WHAT to build once "
-           "another KPI shows expansion is justified.",
+           "another signal shows expansion is justified.",
            ONE_AIRPORT),
     schema(get_national_rank,
-           "KPI 5. How the airport ranks among ALL ~1,300 US airports by passengers, "
+           "Signal 5. How the airport ranks among ALL ~1,300 US airports by passengers, "
            "and whether it has climbed or fallen over 10 years. Use for size, "
            "national standing, market share, 'is it a major airport', or to "
            "sanity-check growth: an airport can grow yet still lose rank. Returns "
-           "plain-English sentences (size, movement) — quote those.",
+           "plain-English sentences (size, movement) - quote those.",
            ONE_AIRPORT),
 ]
 

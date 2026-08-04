@@ -33,7 +33,7 @@ airports in the US" answer: confident prose, zero measurements.
 
 ## Demo sequence
 
-The seven chips under the chat run in order: one per KPI, then two that combine
+The seven chips under the chat run in order: one per signal, then two that combine
 tools. Each draws a different chart, so the sequence shows all five visuals.
 
 | # | Ask | Tool | Chart |

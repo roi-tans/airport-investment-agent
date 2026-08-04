@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 """
-kpis.py — all five KPI calculations, as pure functions.
+kpis.py — all five signal calculations, as pure functions.
 
 ONE FILE because these are five questions asked of ONE table (BTS r495-tyji), not
 five independent analyses. Splitting them across five modules implied more
-separation than exists: KPI 3 is literally KPI 1 + KPI 2 added together.
+separation than exists: Signal 3 is literally Signal 1 + Signal 2 added together.
 
 Everything here is PURE — rows in, dict out, no I/O and no printing. That is what
 makes it testable (see selftest.py) and reusable: tools.py wraps these for the
 model, and the web charts render the same numbers.
 
-    KPI 1  congestion(rows)        how full are the flights, right now?
-    KPI 2  growth(by_year(rows))   which direction, and how fast?
-    KPI 3  score(b) / verdict(b)   which airport to pick? (reuses 1 + 2)
-    KPI 4  mix(rows)               what KIND of passenger?
-    KPI 5  national_rank(airport)  how big, nationally? (aggregated queries)
+    Signal 1  congestion(rows)        how full are the flights, right now?
+    Signal 2  growth(by_year(rows))   which direction, and how fast?
+    Signal 3  score(b) / verdict(b)   which airport to pick? (reuses 1 + 2)
+    Signal 4  mix(rows)               what KIND of passenger?
+    Signal 5  national_rank(airport)  how big, nationally? (aggregated queries)
 
 The four raw facts the whole model rests on: passengers, seats, departures, load
 factor — plus a domestic split and an average trip distance.
@@ -24,7 +24,7 @@ SOURCE  BTS r495-tyji, live JSON API. Query layer lives in bts.py.
 from bts import (DEFAULT_MONTHS, api, by_year, fetch_all_months, full_year,
                  month_of, num, parallel, pct)
 
-# ---------------------------------------------------------------- KPI 1
+# ---------------------------------------------------------------- Signal 1
 def congestion(rows):
     """How full the flights are = load factor = passengers / seats.
 
@@ -44,7 +44,7 @@ def congestion(rows):
             "near_full": sum(1 for v in vals if v >= 85)}
 
 
-# ---------------------------------------------------------------- KPI 2
+# ---------------------------------------------------------------- Signal 2
 def growth(y):
     """Several growth indicators from a by_year() roll-up, so no single noisy
     year-over-year number drives the answer. None if under 2 complete years.
@@ -78,11 +78,11 @@ def growth(y):
     return g
 
 
-# ---------------------------------------------------------------- KPI 3
+# ---------------------------------------------------------------- Signal 3
 def blocks(airport):
-    """KPI 1 + KPI 2 for one airport, from a SINGLE fetch.
+    """Signal 1 + Signal 2 for one airport, from a SINGLE fetch.
 
-    The full history already contains the recent months, so KPI 1's window is
+    The full history already contains the recent months, so Signal 1's window is
     sliced off the tail instead of re-requesting it. Returns None when the airport
     has no rows, so callers can separate MISSING from LOW-SCORING — reporting a
     missing airport as a bad candidate would be a lie.
@@ -90,8 +90,8 @@ def blocks(airport):
     rows = fetch_all_months(airport)
     if not rows:
         return None
-    c = congestion(rows[-DEFAULT_MONTHS:])                # KPI 1
-    g = growth(by_year(rows)) or {}                       # KPI 2
+    c = congestion(rows[-DEFAULT_MONTHS:])                # Signal 1
+    g = growth(by_year(rows)) or {}                       # Signal 2
     return {"airport": airport, "lf": c["avg"],
             "cagr": g.get("cagr"), "gap": g.get("gap"), "vs19": g.get("vs19")}
 
@@ -115,7 +115,7 @@ def verdict(b):
     return v
 
 
-# ---------------------------------------------------------------- KPI 4
+# ---------------------------------------------------------------- Signal 4
 # International share bands (%), from the observed 2025 spread: DEN 6 -> JFK 55.
 GLOBAL, INTERNATIONAL, SOME = 40, 20, 8
 
@@ -123,7 +123,7 @@ GLOBAL, INTERNATIONAL, SOME = 40, 20, 8
 def mix(rows):
     """What KIND of passenger, not how many.
 
-    Every other KPI counts passengers; this asks who they are. Two airports with
+    Every other signal counts passengers; this asks who they are. Two airports with
     identical traffic need different buildings: international share drives customs
     halls and wide-body gates, trip length drives dwell time and seating.
 
@@ -147,7 +147,7 @@ def profile(intl_pct):
         return ("global gateway",
                 "Most traffic is international, so terminal needs are dominated by "
                 "customs and immigration capacity, wide-body gates and long dwell "
-                "times — the most expensive kind of space, and the highest "
+                "times - the most expensive kind of space, and the highest "
                 "retail spend per passenger.")
     if intl_pct >= INTERNATIONAL:
         return ("major international",
@@ -155,11 +155,11 @@ def profile(intl_pct):
                 "real part of any expansion, not an afterthought.")
     if intl_pct >= SOME:
         return ("mostly domestic",
-                "Largely a domestic airport with some international service — "
+                "Largely a domestic airport with some international service - "
                 "expansion is mainly about domestic gates and security capacity.")
     return ("domestic",
             "Almost entirely domestic traffic, so expansion is about domestic "
-            "gates, security lines and baggage — little customs requirement.")
+            "gates, security lines and baggage - little customs requirement.")
 
 
 def haul(avg_miles):
@@ -170,11 +170,11 @@ def haul(avg_miles):
                              "arrive early and spend longer in the terminal.")
     if avg_miles >= 900:
         return ("medium-haul", "A mix of short and long trips.")
-    return ("short-haul", "Mostly short trips — passengers move through quickly, "
+    return ("short-haul", "Mostly short trips - passengers move through quickly, "
                           "so throughput matters more than lounge space.")
 
 
-# ---------------------------------------------------------------- KPI 5
+# ---------------------------------------------------------------- Signal 5
 MOVE = 10               # years back for the rank-movement comparison
 SHIFT = 3               # places moved before we call it climbing/falling
 
@@ -220,7 +220,7 @@ def tier_of(rank):
 
 
 def national_rank(airport):
-    """KPI 5: this airport against the whole country, not against its own past.
+    """Signal 5: this airport against the whole country, not against its own past.
 
     The two can disagree, and that disagreement IS the insight — an airport can
     grow every year and still slide down the ranking because rivals grew faster.

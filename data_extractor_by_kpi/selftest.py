@@ -2,11 +2,11 @@
 """
 selftest.py — one command to check the whole data layer against live BTS.
 
-Replaces the five per-KPI CLI printers. Run it after touching kpis.py, bts.py or
+Replaces the five per-signal CLI printers. Run it after touching kpis.py, bts.py or
 tools.py, and before any deploy.
 
-    python3 selftest.py              all five KPIs on default airports
-    python3 selftest.py SFO JFK      the single-airport KPIs on these codes
+    python3 selftest.py              all five signals on default airports
+    python3 selftest.py SFO JFK      the single-airport signals on these codes
 
 It checks INVARIANTS, not exact values — BTS adds a month at a time, so hardcoded
 numbers would rot. What must always hold:
@@ -46,7 +46,7 @@ def head(title):
     print(f"\n{title}\n" + "-" * len(title))
 
 
-# ---------------------------------------------------------------- KPIs 1-4
+# ---------------------------------------------------------------- Signals 1-4
 def kpi_checks(code):
     head(f"{code}")
     rows = fetch_recent_months(code)
@@ -54,42 +54,42 @@ def kpi_checks(code):
     if not rows:
         return
 
-    c = congestion(rows)                                             # KPI 1
+    c = congestion(rows)                                             # Signal 1
     mean = sum(v for _, v in c["series"]) / len(c["series"])
-    check("KPI 1  load factor in 0-100", 0 < c["avg"] <= 100, f"{c['avg']:.1f}")
+    check("Signal 1  load factor in 0-100", 0 < c["avg"] <= 100, f"{c['avg']:.1f}")
     # The chart draws `series`; the answer quotes `avg`. They must agree, or the
     # picture contradicts the text.
-    check("KPI 1  avg == mean of charted series", abs(c["avg"] - mean) < 0.05,
+    check("Signal 1  avg == mean of charted series", abs(c["avg"] - mean) < 0.05,
           f"{c['avg']:.3f} vs {mean:.3f}")
-    check("KPI 1  peak >= avg", c["peak"][1] >= c["avg"])
+    check("Signal 1  peak >= avg", c["peak"][1] >= c["avg"])
 
     y = by_year(fetch_all_months(code))
-    g = growth(y)                                                    # KPI 2
-    check("KPI 2  growth computed", g is not None)
+    g = growth(y)                                                    # Signal 2
+    check("Signal 2  growth computed", g is not None)
     if g:
-        check("KPI 2  anchored on a complete year", y[g["Y"]]["months"] >= 12,
+        check("Signal 2  anchored on a complete year", y[g["Y"]]["months"] >= 12,
               f"{g['Y']} has {y[g['Y']]['months']} months")
         if g["gap"] is not None and g["cagr"] is not None:
-            check("KPI 2  gap == pax cagr - seat cagr",
+            check("Signal 2  gap == pax cagr - seat cagr",
                   abs(g["gap"] - (g["cagr"] - g["seat_cagr"])) < 1e-9)
 
-    b = blocks(code)                                                 # KPI 3
-    check("KPI 3  blocks + score", b is not None and isinstance(score(b), float))
-    check("KPI 3  verdict is a phrase", isinstance(verdict(b), str) and verdict(b))
+    b = blocks(code)                                                 # Signal 3
+    check("Signal 3  blocks + score", b is not None and isinstance(score(b), float))
+    check("Signal 3  verdict is a phrase", isinstance(verdict(b), str) and verdict(b))
 
-    m = mix(rows)                                                    # KPI 4
-    check("KPI 4  international share 0-100", 0 <= m["intl_pct"] <= 100,
+    m = mix(rows)                                                    # Signal 4
+    check("Signal 4  international share 0-100", 0 <= m["intl_pct"] <= 100,
           f"{m['intl_pct']:.1f}")
     # Weighted, never summed: a summed average once produced tens of thousands.
-    check("KPI 4  avg trip plausible (50-9000 mi)", 50 < m["avg_miles"] < 9000,
+    check("Signal 4  avg trip plausible (50-9000 mi)", 50 < m["avg_miles"] < 9000,
           f"{m['avg_miles']:.0f}")
-    check("KPI 4  profile + haul labelled",
+    check("Signal 4  profile + haul labelled",
           bool(profile(m["intl_pct"])[0]) and bool(haul(m["avg_miles"])[0]))
 
 
-# ---------------------------------------------------------------- KPI 5
+# ---------------------------------------------------------------- Signal 5
 def rank_checks(code):
-    head("KPI 5  national rank")
+    head("Signal 5  national rank")
     year = latest_complete_year()
     check("year is complete and recent", 2014 <= year <= 2100, str(year))
     r = national_rank(code)

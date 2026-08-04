@@ -2,11 +2,11 @@
 """
 agent.py — Airport Investment Intelligence Agent: the conversation loop.
 
-The model reads the question, decides which KPI to ACTIVATE (tool-calling), the
-KPI runs against BTS r495-tyji, and the model writes the answer.
+The model reads the question, decides which signal to ACTIVATE (tool-calling), the
+signal runs against BTS r495-tyji, and the model writes the answer.
 
 This file owns ONLY the loop and the memory. The other pieces live next door:
-    tools.py    the KPI tools + their schemas  (what the agent can DO)
+    tools.py    the five tools + their schemas  (what the agent can DO)
     prompts.py  the system prompt              (how the agent BEHAVES)
 
 SETUP   pip install openai

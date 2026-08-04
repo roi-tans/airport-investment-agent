@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-bts.py — shared helpers for the BTS T-100 KPI scripts.
+bts.py — shared helpers for the BTS T-100 signal scripts.
 
-ONE SOURCE OF TRUTH for everything the KPI scripts have in common: the API
+ONE SOURCE OF TRUTH for everything the signal scripts have in common: the API
 endpoint, the query layer, numeric coercion, and the monthly->annual roll-up.
-KPI scripts import from here instead of re-declaring their own copies.
+signal scripts import from here instead of re-declaring their own copies.
 
 SOURCE  BTS r495-tyji — "T100 Segment Summary By Origin Airport", live JSON API.
         Grain: one row per origin airport per month, 2014-present. No deps.
 
-USED BY  kpis.py (all five KPI calculations), tools.py
+USED BY  kpis.py (all five signal calculations), tools.py
 """
 import json
 import urllib.parse
@@ -17,7 +17,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 BASE = "https://data.bts.gov/resource/r495-tyji.json"
-DEFAULT_MONTHS = 6          # half a year — the default rolling KPI window
+DEFAULT_MONTHS = 6          # half a year — the default rolling signal window
 MAX_PARALLEL = 8            # simultaneous BTS requests; be a polite API client
 
 
